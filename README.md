@@ -1,10 +1,13 @@
-# EventGridToLogicAppWithLargeFiles
+# Event Grid to Logic App with Large Files
 
+<h2>Disclaimer</h2>
+This document is provided as-is without any warranty. It is intended as inspiration only. Code & configuration may not be suitable for production workloads and need proper review/changes before implementation.  
+
+<h2>Intro</h2>
 Whenever a file is created in Blob Storage that has an Event Grid Subscription attached, the BlobCreated Event is fired at the creation of the file (which is good), but it might take some time for the file to be fully uploaded (which can cause some issues when subsystems start processing during that time). As the file remains 0 bytes until the upload is completed, this Logic App simply loops with a delay of a few seconds and checks the file size for being greater than 0. If so, processing of the file can start (in this sample a simple copy to a folder named 'processed' and the deletion of the original file. This allows for the same file to be uploaded again for re-processing) 
 
 Logic App overview
 ![Logic App Outline](Images/LogicAppOutline.png)<br />
-
 
 When an Event is received from Event Grid
 ![Start Event](Images/Event.png)<br />
@@ -14,7 +17,9 @@ Initialize BlobSize variable to check if it is bigger than 0
 
 Intialize Blob Url varable based on Subject of Event
 
+```
 replace(replace(triggerBody()?['subject'],'/blobServices/default/containers',''), 'blobs/', '')
+```
 
 ![Int Blob Url](Images/InitBlobUrl.png)<br />
 
@@ -33,9 +38,9 @@ Loop Until Size Greater Than 0 and delay each iteration for 2 seconds
 
 In this sample, the only 'processing'  done is to copy the blob to another folder by replacing a string in the path: 
 
-'''
+```
 replace(variables('BlobUrl'), '/notprocessed/', '/processed/')
-'''
+```
 
 ![Copy Blob To Processed Folder](Images/CopyBlobToProcessedFolder.png)<br />
 
